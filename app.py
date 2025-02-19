@@ -1,102 +1,101 @@
 from flask import Flask, request, jsonify, render_template
 import pandas as pd
+import numpy as np
+import requests
+from datetime import datetime
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # This enables CORS for all routes
+CORS(app)
 
+NASA_API_URL = "https://power.larc.nasa.gov/api/temporal/hourly/point"
+START_DATE = "20210101"
 
-# Helper function to calculate true power from current and voltage
-def calculate_true_power(df):
-    true_power = None
-    if 'power' in df.columns:
-        # If the power column exists, use it directly
-        true_power = df['power'].mean()  # Average power
-    elif 'current' in df.columns and 'voltage' in df.columns:
-        # If current and voltage columns exist, calculate power (P = V * I)
-        df['power'] = df['current'] * df['voltage']
-        true_power = df['power'].mean()  # Average power
-    elif 'current' in df.columns:
-        # If only current is given, assume a standard voltage
-        standard_voltage = 12  # Example, can be adjusted based on the panel type
-        df['power'] = df['current'] * standard_voltage
-        true_power = df['power'].mean()  # Average power
-    return true_power
+def fetch_nasa_data(lat, lon):
+    end_date = datetime.now().strftime("%Y%m%d")
+    params = {
+        "start": START_DATE,
+        "end": end_date,
+        "latitude": lat,
+        "longitude": lon,
+        "community": "RE",
+        "parameters": "ALLSKY_SFC_SW_DWN,ALLSKY_SFC_SW_DIFF,ALLSKY_SFC_SW_DNI,T2M,CLRSKY_SFC_SW_DWN",
+        "format": "JSON"
+    }
+    response = requests.get(NASA_API_URL, params=params)
+    if response.status_code != 200:
+        return None
+    data = response.json()
+    return process_nasa_data(data, lat)
 
-# Endpoint to upload CSV and calculate power
-@app.route('/upload_csv', methods=['POST'])
-def upload_csv():
-    # Check if a file is part of the request
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-    file = request.files['file']
+def process_nasa_data(data, lat):
+    df = pd.DataFrame()
+    df["YEAR"] = [int(y[:4]) for y in data["properties"]["parameter"]["ALLSKY_SFC_SW_DWN"].keys()]
+    df["MO"] = [int(y[4:6]) for y in data["properties"]["parameter"]["ALLSKY_SFC_SW_DWN"].keys()]
+    df["DY"] = [int(y[6:8]) for y in data["properties"]["parameter"]["ALLSKY_SFC_SW_DWN"].keys()]
+    df["HR"] = [int(y[8:]) for y in data["properties"]["parameter"]["ALLSKY_SFC_SW_DWN"].keys()]
     
-    # Validate that the file is a CSV
-    if not file.filename.endswith('.csv'):
-        return jsonify({"error": "Only CSV files are allowed"}), 400
-
-    try:
-        # Read the CSV file using pandas
-        df = pd.read_csv(file)
-    except Exception as e:
-        return jsonify({"error": f"Error reading the CSV file: {str(e)}"}), 400
-
-    # Calculate true power
-    true_power = calculate_true_power(df)
+    df["ALLSKY_SFC_SW_DWN"] = list(data["properties"]["parameter"]["ALLSKY_SFC_SW_DWN"].values())
+    df["ALLSKY_SFC_SW_DIFF"] = list(data["properties"]["parameter"]["ALLSKY_SFC_SW_DIFF"].values())
+    df["ALLSKY_SFC_SW_DNI"] = list(data["properties"]["parameter"]["ALLSKY_SFC_SW_DNI"].values())
+    df["T2M"] = list(data["properties"]["parameter"]["T2M"].values())
+    df["CLRSKY_SFC_SW_DWN"] = list(data["properties"]["parameter"]["CLRSKY_SFC_SW_DWN"].values())
     
-    if true_power is None:
-        return jsonify({"error": "Required columns (current, voltage, or power) are missing in the CSV"}), 400
+    df["Irradiación Global Directa"] = df["ALLSKY_SFC_SW_DWN"] - df["ALLSKY_SFC_SW_DIFF"]
+    
+    diasJulianos = []
+    for i in range(len(df)):
+        if i == 0:
+            diasJulianos.append(df['DY'][i])
+        elif df['YEAR'][i] != df['YEAR'][i-1]:
+            diasJulianos.append(1)
+        elif df['DY'][i] != df['DY'][i-1]:
+            diasJulianos.append(diasJulianos[i-1] + 1)
+        else:
+            diasJulianos.append(diasJulianos[i-1])
+    
+    df.insert(2, 'Días Julianos', diasJulianos)
+    df["Ángulo Solar"] = 15 * df["HR"] - 180
+    df["Declinación"] = ((-1)**(lat < 0)) * 23.45 * np.sin(np.radians((360/365 * (284 + df["Días Julianos"]))))
+    df["Zenith"] = np.arccos(np.sin(np.radians(lat)) * np.sin(np.radians(df["Declinación"])) + np.cos(np.radians(lat)) * np.cos(np.radians(df["Declinación"])) * np.cos(np.radians(df["Ángulo Solar"]))) * 180 / np.pi
+    df["Zenith Aplicado"] = np.where(df["Zenith"] > 90, 90, df["Zenith"])
+    df["Cos de Zenith"] = np.cos(np.radians(df["Zenith Aplicado"]))
+    df["Altitud"] = 90 - df["Zenith Aplicado"]
+    df["Azimuth al Norte"] = np.arcsin(np.cos(np.radians(df["Declinación"])) * np.sin(np.radians(df["Ángulo Solar"])) / np.cos(np.radians(df["Altitud"]))) * 180 / np.pi
+    df["Prueba"] = ((np.cos(np.radians(df["Ángulo Solar"])) < np.tan(np.radians(df["Declinación"])) / np.tan(np.radians(lat))) & (lat < 0)) + ((np.cos(np.radians(df["Ángulo Solar"])) > np.tan(np.radians(df["Declinación"])) / np.tan(np.radians(lat))) & (lat >= 0))
+    df["Azimuth al Sur"] = np.where(df["Prueba"], df["Azimuth al Norte"], np.where(df["HR"] < 12, -180 + abs(df["Azimuth al Norte"]), 180 + df["Azimuth al Norte"]))
+    
+    azimuth_del_panel_eo = np.where(df["Azimuth al Sur"] < 0, -90, np.where(df["Azimuth al Sur"] == 0, 0, 90))
+    tangente_angulo_inclinacion_eo = np.tan(np.radians(df["Zenith"])) * abs(np.cos(np.radians(azimuth_del_panel_eo - df["Azimuth al Sur"])))
+    angulo_ideal_eo = np.where(df["Zenith"] >= 90, 90, np.arctan(tangente_angulo_inclinacion_eo) * 180 / np.pi)
+    angulo_inclinacion_eo = np.where(angulo_ideal_eo > 60, 60, angulo_ideal_eo)
+    df["Factor K"] = angulo_inclinacion_eo  # Placeholder if needed
+    df["Horas Solares"] = (df["Factor K"] * df["Irradiación Global Directa"]) / 1000 * 0.89104
+    
+    df = df[(df["HR"] >= 8) & (df["HR"] <= 17)]
+    return df.tail(25).to_dict(orient="records")
 
-    return jsonify({
-        "true_power": true_power
-    })
-
-# Endpoint to receive manual data input for current, voltage, and power
-@app.route('/manual_data', methods=['POST'])
-def manual_data():
-    try:
-        current = float(request.form['current'])
-        voltage = float(request.form['voltage'])
-        power = float(request.form['power'])
-    except (ValueError, TypeError):
-        return jsonify({"error": "Invalid input. Ensure all values are numeric."}), 400
-
-    # Calculate true power
-    if current and voltage:
-        true_power = current * voltage
-    elif power:
-        true_power = power
-    else:
-        return jsonify({"error": "Invalid data provided"}), 400
-
-    return jsonify({
-        "true_power": true_power
-    })
-
-# Route to calculate expected power based on location (using NASA data, for example)
-@app.route('/get_expected_power', methods=['GET'])
-def get_expected_power():
+@app.route('/get_solar_data', methods=['GET'])
+def get_solar_data():
     try:
         lat = float(request.args.get('lat'))
         lon = float(request.args.get('lon'))
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid latitude or longitude provided."}), 400
     
-    # Example: You would fetch actual NASA data here based on lat/long
-    # For simplicity, we are returning a mock expected power
-    expected_power = 250  # Example expected power (W) from NASA data
+    solar_data = fetch_nasa_data(lat, lon)
+    if solar_data is None:
+        return jsonify({"error": "Failed to fetch data from NASA API."}), 500
+    
+    return jsonify({"solar_data": solar_data})
 
-    return jsonify({
-        "expected_power": expected_power
-    })
-
-# Serve the frontend HTML file
 @app.route('/')
 def index():
     return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 

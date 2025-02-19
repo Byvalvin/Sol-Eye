@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar Panel Efficiency Monitor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
@@ -22,8 +23,9 @@
                     <input type="number" id="latitude" step="any" placeholder="Latitude">
                     <input type="number" id="longitude" step="any" placeholder="Longitude">
                 </div>
+                <button id="fetch-data">Get Solar Data</button>
             </section>
-            <div id="map-placeholder">Map will be here</div>
+            <canvas id="solarChart"></canvas>
         </div>
         
         <!-- Right Section: Solar Panel Data Input -->
