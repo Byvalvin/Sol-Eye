@@ -94,3 +94,9 @@ def index():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+"""
+pip install --cache-dir /local/scratch/Sol-Eye/Sol-Eye flask pandas
+"""

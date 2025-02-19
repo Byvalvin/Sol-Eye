@@ -95,7 +95,12 @@ document.getElementById("show-map").addEventListener("click", function() {
     }
 
     // Add a marker at the provided lat/lon
-    const marker = L.marker([lat, lon]).addTo(map);
+    var customIcon = L.icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png'
+    });
+    // Then apply it to your marker
+    const marker = L.marker([lat, lon], { icon: customIcon }).addTo(map);
     marker.bindPopup("Your Location").openPopup();
 
     // Update coordinates based on map click
@@ -153,7 +158,7 @@ document.getElementById("calculate").addEventListener("click", function() {
     .then(data => {
         const expectedPower = data.expected_power;
         const truePower = parseFloat(document.getElementById("true-power").innerText.split(": ")[1].replace(" W", ""));
-        
+       
         // Display expected power and calculate efficiency
         document.getElementById("expected-power").innerText = `Expected Power: ${expectedPower} W`;
         const efficiency = (truePower / expectedPower) * 100;
