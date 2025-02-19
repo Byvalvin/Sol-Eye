@@ -1,4 +1,4 @@
-/* General Body Styles */
+/* General Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -19,54 +19,102 @@ h1 {
     margin: 0;
 }
 
-/* Main Container */
-main {
-    padding: 20px;
+/* Layout Styling */
+.container {
+    display: flex;
+    justify-content: space-between;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 20px auto;
+    gap: 20px;
 }
 
-/* Section Styling */
+.left-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#address {
+    width: 90%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 1em;
+    display: block;
+    margin: 0 auto 20px auto;
+}
+#address-suggestions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+    position: absolute;
+    background: white;
+    width: 90%;
+    max-width: 400px;
+    z-index: 1000;
+}
+#address-suggestions li {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+#address-suggestions li:hover {
+    background-color: #f0f0f0;
+}
+
+
+.right-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
 section {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
     padding: 20px;
 }
 
-h2 {
-    font-size: 1.8em;
-    margin-bottom: 15px;
+#map-placeholder {
+    background-color: #e0e0e0;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
 }
 
-h3 {
-    font-size: 1.2em;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
+/* Form and Input Styles */
 label {
     font-weight: bold;
-    margin-bottom: 5px;
     display: block;
+    margin-top: 10px;
+}
+
+#manual-input .input-group {
+    gap: 20px;
+}
+#csv-input {
+    margin-top: 40px;
+    text-align: center;
+}
+.input-group {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 input[type="number"],
 input[type="text"],
 input[type="file"] {
-    width: 100%;
+    flex: 1;
     padding: 10px;
-    margin: 8px 0;
     font-size: 1em;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-
-input[type="number"]:focus,
-input[type="text"]:focus {
-    border-color: #007bff;
-    outline: none;
 }
 
 button {
@@ -85,126 +133,61 @@ button:hover {
     background-color: #0056b3;
 }
 
-#csv-upload {
-    padding: 6px;
-}
-
-#show-map {
-    width: auto;
-}
-
-/* Map Styling */
-#map {
-    margin-top: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    height: 400px; /* Set a default height for consistency */
-}
-
 /* Results Section */
 #result {
     background-color: #f9f9f9;
-    padding: 15px;
+    padding: 20px;
     border-radius: 8px;
-    margin-top: 30px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-#result h2 {
-    font-size: 1.8em;
-    margin-bottom: 15px;
+#recommendation {
+    font-size: 1.3em;
+    font-weight: bold;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 10px;
 }
 
-#result p {
-    font-size: 1.2em;
+/* Toggle Styles for Input Selection */
+.input-section {
+    transition: opacity 0.3s ease;
+    position: relative;
+}
+
+.input-section.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.toggle-buttons {
+    display: flex;
+    justify-content: space-around;
     margin-bottom: 10px;
 }
 
-/* Address Suggestions List */
-#address-suggestions {
-    padding: 0;
-    margin: 5px 0;
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    display: none;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-#address-suggestions li {
-    padding: 8px;
+.toggle-buttons button {
+    flex: 1;
+    padding: 10px;
+    border: none;
     cursor: pointer;
+    background-color: #ddd;
+    color: #333;
+    transition: background-color 0.3s ease;
 }
 
-#address-suggestions li:hover {
-    background-color: #f1f1f1;
-}
-
-/* Footer Styling */
-footer {
-    background-color: #2d3e50;
+.toggle-buttons button.active {
+    background-color: #007bff;
     color: white;
-    text-align: center;
-    padding: 10px 0;
-    position: relative;
-    width: 100%;
-    bottom: 0;
 }
 
-/* Media Queries for Responsiveness */
+/* Responsive Design */
 @media (max-width: 768px) {
-    main {
-        padding: 15px;
+    .container {
+        flex-direction: column;
     }
-
-    section {
-        padding: 15px;
+    .input-group {
+        flex-direction: column;
     }
-
-    h1 {
-        font-size: 2em;
-    }
-
-    input[type="number"],
-    input[type="text"],
-    input[type="file"],
-    button {
-        width: 100%;
-        font-size: 1em;
-    }
-
-    #map {
-        height: 300px;
-    }
-
-    footer {
-        position: relative;
-    }
-}
-
-/* Large Screen */
-@media (min-width: 1200px) {
-    main {
-        padding: 40px;
-    }
-
-    section {
-        padding: 30px;
-    }
-
-    h1 {
-        font-size: 3em;
-    }
-}
-
-/* Accessibility Enhancements */
-input:disabled,
-button:disabled {
-    background-color: #d6d6d6;
-    cursor: not-allowed;
-}
-
-button:focus {
-    outline: 3px solid #0056b3;
 }

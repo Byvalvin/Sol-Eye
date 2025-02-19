@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify, render_template
 import pandas as pd
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # This enables CORS for all routes
+
 
 # Helper function to calculate true power from current and voltage
 def calculate_true_power(df):
@@ -98,5 +101,5 @@ if __name__ == "__main__":
 
 
 """
-pip install --cache-dir /local/scratch/Sol-Eye/Sol-Eye flask pandas
+pip install --cache-dir /local/scratch/Sol-Eye/Sol-Eye flask flask-cors pandas
 """

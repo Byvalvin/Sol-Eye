@@ -3,62 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar Panel Efficiency Calculator</title>
+    <title>Solar Panel Efficiency Monitor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-control-geocoder@2.0.0/dist/Control.Geocoder.js"></script>
 </head>
 <body>
     <header>
-        <h1>Solar Panel Efficiency Calculator</h1>
+        <h1>Solar Panel Efficiency Monitor</h1>
     </header>
-
-    <main>
-        <!-- Location Section -->
-        <section>
-            <h2>Enter Location</h2>
-            <label for="latitude">Latitude:</label>
-            <input type="number" id="latitude" placeholder="Enter latitude" required>
-            <br><br>
-            <label for="longitude">Longitude:</label>
-            <input type="number" id="longitude" placeholder="Enter longitude" required>
-            <br><br>
-
-            <label for="address">Or Enter Address:</label>
-            <input type="text" id="address" placeholder="Enter address">
-            <ul id="address-suggestions" style="list-style-type: none; padding: 0; margin-top: 5px;"></ul>
-            <br><br>
-        </section>
-
-        <!-- Solar Panel Data Section -->
-        <section>
-            <h2>Enter Solar Panel Data</h2>
-            <label for="current">Current (A):</label>
-            <input type="number" id="current" required><br><br>
-            <label for="voltage">Voltage (V):</label>
-            <input type="number" id="voltage"><br><br>
-            <label for="power">Power (W):</label>
-            <input type="number" id="power"><br><br>
-
-            <button id="calculate">Calculate Efficiency</button>
-        </section>
-
-        <!-- Results Section -->
-        <section id="result">
-            <h2>Results</h2>
-            <p id="expected-power">Expected Power: </p>
-            <p id="true-power">True Power: </p>
-            <p id="efficiency">Efficiency: </p>
-        </section>
-
-        <!-- Map Display -->
-        <div id="map" style="width: 100%; height: 300px;"></div>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Solar Panel Efficiency Calculator</p>
-    </footer>
-
+    <div class="container">
+        <!-- Left Section: Location Input and Map -->
+        <div class="left-section">
+            <section>
+                <h2>Location Input</h2>
+                <input type="text" id="address" placeholder="Enter address">
+                <ul id="address-suggestions"></ul>
+                
+                <div class="input-group">
+                    <input type="number" id="latitude" step="any" placeholder="Latitude">
+                    <input type="number" id="longitude" step="any" placeholder="Longitude">
+                </div>
+            </section>
+            <div id="map-placeholder">Map will be here</div>
+        </div>
+        
+        <!-- Right Section: Solar Panel Data Input -->
+        <div class="right-section">
+            <section>
+                <h2>Solar Panel Data Input</h2>
+                <div class="toggle-buttons">
+                    <button id="manual-btn" class="active">Manual Input</button>
+                    <button id="csv-btn">Upload CSV</button>
+                </div>
+                
+                <div id="manual-input" class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="current" step="any" placeholder="Current (A)">
+                        <input type="number" id="voltage" step="any" placeholder="Voltage (V)">
+                        <input type="number" id="power" step="any" placeholder="Power (W, optional)">
+                    </div>
+                </div>
+                
+                <div id="csv-input" class="input-section disabled">
+                    <input type="file" id="csv-upload" accept=".csv">
+                </div>
+            </section>
+            
+            <!-- Output Section -->
+            <section>
+                <h2>Results</h2>
+                <p id="expected-power">Expected Power: N/A</p>
+                <p id="true-power">True Power: N/A</p>
+                <p id="efficiency">Efficiency: N/A</p>
+                <p id="recommendation">Recommendation: N/A</p>
+                <button id="calculate">Calculate Efficiency</button>
+            </section>
+        </div>
+    </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
