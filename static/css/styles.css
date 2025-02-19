@@ -1,0 +1,210 @@
+/* General Body Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #2d3e50;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin: 0;
+}
+
+/* Main Container */
+main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Section Styling */
+section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+}
+
+h3 {
+    font-size: 1.2em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+input[type="number"],
+input[type="text"],
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#csv-upload {
+    padding: 6px;
+}
+
+#show-map {
+    width: auto;
+}
+
+/* Map Styling */
+#map {
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: 400px; /* Set a default height for consistency */
+}
+
+/* Results Section */
+#result {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#result h2 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+}
+
+#result p {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+/* Address Suggestions List */
+#address-suggestions {
+    padding: 0;
+    margin: 5px 0;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#address-suggestions li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+#address-suggestions li:hover {
+    background-color: #f1f1f1;
+}
+
+/* Footer Styling */
+footer {
+    background-color: #2d3e50;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: relative;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    main {
+        padding: 15px;
+    }
+
+    section {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    input[type="file"],
+    button {
+        width: 100%;
+        font-size: 1em;
+    }
+
+    #map {
+        height: 300px;
+    }
+
+    footer {
+        position: relative;
+    }
+}
+
+/* Large Screen */
+@media (min-width: 1200px) {
+    main {
+        padding: 40px;
+    }
+
+    section {
+        padding: 30px;
+    }
+
+    h1 {
+        font-size: 3em;
+    }
+}
+
+/* Accessibility Enhancements */
+input:disabled,
+button:disabled {
+    background-color: #d6d6d6;
+    cursor: not-allowed;
+}
+
+button:focus {
+    outline: 3px solid #0056b3;
+}
