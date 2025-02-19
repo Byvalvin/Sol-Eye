@@ -1,14 +1,17 @@
 let map;
-let geocodeTimeout; // Store timeout for debouncing input
-const debounceDelay = 500; // Delay in ms after the user stops typing before triggering geocoding
+
+// Initialize the map with default location (Edmonton) above the input fields
+function initializeMap() {
+    map = L.map('map').setView([53.5461, -113.4938], 10); // Edmonton coordinates
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.marker([53.5461, -113.4938]).addTo(map).bindPopup("Edmonton").openPopup();
+}
 
 // Function to handle geocoding address to lat/lng and auto-fill the fields
 function geocodeAddress(address) {
     if (!address) return;
 
     const geocoder = L.Control.Geocoder.nominatim();
-
-    // Fetch geocoding results from Nominatim API
     geocoder.geocode(address, function(results) {
         if (results.length === 0) {
             alert("Address not found.");
@@ -22,99 +25,54 @@ function geocodeAddress(address) {
         document.getElementById("latitude").value = lat.toFixed(4);
         document.getElementById("longitude").value = lon.toFixed(4);
 
-        // Initialize map if not already done
-        if (!map) {
-            map = L.map('map').setView([lat, lon], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        } else {
-            map.setView([lat, lon], 13);
-        }
-
-        // Add a marker for the geocoded location
+        // Update map view and marker
+        map.setView([lat, lon], 13);
         const marker = L.marker([lat, lon]).addTo(map);
         marker.bindPopup("Your Location").openPopup();
     });
 }
 
-// Handle address input with debounce to limit geocoding calls
-document.getElementById("address").addEventListener("input", function() {
-    const address = document.getElementById("address").value;
-    clearTimeout(geocodeTimeout); // Clear the previous timeout to prevent multiple calls
-    geocodeTimeout = setTimeout(function() {
-        geocodeAddress(address); // Geocode address after delay
-    }, debounceDelay);
-});
+// Function to fetch address suggestions
+function fetchSuggestions(query) {
+    fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1`)
+        .then(response => response.json())
+        .then(data => {
+            const suggestions = data.map(item => item.display_name);
+            showSuggestions(suggestions);
+        });
+}
 
-// Function to fetch address suggestions and display them
-document.getElementById("address").addEventListener("input", function() {
-    const address = document.getElementById("address").value;
-    if (address.length > 3) { // Fetch suggestions if the address is more than 3 characters
-        fetch(`https://nominatim.openstreetmap.org/search?q=${address}&format=json&addressdetails=1`)
-            .then(response => response.json())
-            .then(data => {
-                const suggestions = data.map(item => item.display_name);
-                showSuggestions(suggestions);
-            });
-    }
-});
-
-// Display address suggestions in a dropdown
+// Display address suggestions
 function showSuggestions(suggestions) {
     const suggestionList = document.getElementById("address-suggestions");
-    suggestionList.innerHTML = ''; // Clear previous suggestions
+    suggestionList.innerHTML = '';
 
     suggestions.forEach(suggestion => {
         const li = document.createElement("li");
         li.textContent = suggestion;
         li.onclick = function() {
             document.getElementById("address").value = suggestion;
-            geocodeAddress(suggestion); // Geocode the selected suggestion
-            suggestionList.innerHTML = ''; // Clear suggestions after selection
+            geocodeAddress(suggestion);
+            suggestionList.innerHTML = '';
         };
         suggestionList.appendChild(li);
     });
 }
 
-// Handle pressing Enter to trigger geocoding directly
-document.getElementById("address").addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        const address = document.getElementById("address").value;
-        geocodeAddress(address); // Trigger geocoding on Enter key
+// Event listeners
+document.getElementById("address").addEventListener("input", function() {
+    const address = document.getElementById("address").value;
+    if (address.length > 3) { // Only fetch suggestions for addresses longer than 3 characters
+        fetchSuggestions(address);
     }
 });
 
-// Handle map click to select a location and update lat/lng fields
-document.getElementById("show-map").addEventListener("click", function() {
-    const lat = document.getElementById("latitude").value;
-    const lon = document.getElementById("longitude").value;
-
-    // Initialize Leaflet map if not already done
-    if (!map) {
-        map = L.map('map').setView([lat, lon], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+// Trigger geocoding when "Enter" key is pressed
+document.getElementById("address").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        const address = document.getElementById("address").value;
+        geocodeAddress(address); // Trigger geocoding
     }
-
-    // Add a marker at the provided lat/lon
-    var customIcon = L.icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png'
-    });
-    // Then apply it to your marker
-    const marker = L.marker([lat, lon], { icon: customIcon }).addTo(map);
-    marker.bindPopup("Your Location").openPopup();
-
-    // Update coordinates based on map click
-    map.on('click', function(e) {
-        const lat = e.latlng.lat;
-        const lon = e.latlng.lng;
-
-        // Update the input fields with clicked coordinates
-        document.getElementById("latitude").value = lat.toFixed(4);
-        document.getElementById("longitude").value = lon.toFixed(4);
-
-        // Update the marker position
-        marker.setLatLng([lat, lon]);
-    });
 });
 
 // Handle form submission for calculating true power
@@ -138,7 +96,6 @@ document.getElementById("calculate").addEventListener("click", function() {
         formData.append('power', power);
     }
 
-    // Send form data to backend for processing
     fetch(requestUrl, {
         method: "POST",
         body: formData
@@ -152,16 +109,19 @@ document.getElementById("calculate").addEventListener("click", function() {
         }
     });
 
-    // Fetch expected power data based on lat/lng
+    // Fetch expected power based on lat/lng
     fetch(`http://localhost:5000/get_expected_power?lat=${document.getElementById("latitude").value}&lon=${document.getElementById("longitude").value}`)
     .then(response => response.json())
     .then(data => {
         const expectedPower = data.expected_power;
         const truePower = parseFloat(document.getElementById("true-power").innerText.split(": ")[1].replace(" W", ""));
-       
-        // Display expected power and calculate efficiency
+
+        // Display expected power and efficiency
         document.getElementById("expected-power").innerText = `Expected Power: ${expectedPower} W`;
         const efficiency = (truePower / expectedPower) * 100;
         document.getElementById("efficiency").innerText = `Efficiency: ${efficiency.toFixed(2)}%`;
     });
 });
+
+// Initialize map on page load
+initializeMap();
