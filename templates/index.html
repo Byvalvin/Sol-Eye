@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar Panel Efficiency Calculator</title>
-    <!-- Link to external CSS file (Flask will serve this from the /static folder) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <!-- Leaflet.js for maps -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder@2.0.0/dist/Control.Geocoder.js"></script>
 </head>
@@ -19,7 +17,6 @@
         <!-- Location Section -->
         <section>
             <h2>Enter Location</h2>
-            <!-- Latitude and Longitude Inputs -->
             <label for="latitude">Latitude:</label>
             <input type="number" id="latitude" placeholder="Enter latitude" required>
             <br><br>
@@ -27,28 +24,21 @@
             <input type="number" id="longitude" placeholder="Enter longitude" required>
             <br><br>
 
-            <!-- Address Input with Suggestions -->
             <label for="address">Or Enter Address:</label>
             <input type="text" id="address" placeholder="Enter address">
-            <!-- Suggestions List -->
             <ul id="address-suggestions" style="list-style-type: none; padding: 0; margin-top: 5px;"></ul>
             <br><br>
-            <button id="show-map">Show Map</button>
         </section>
 
         <!-- Solar Panel Data Section -->
         <section>
             <h2>Enter Solar Panel Data</h2>
-            <h3>Or Enter Manual Data</h3>
             <label for="current">Current (A):</label>
             <input type="number" id="current" required><br><br>
             <label for="voltage">Voltage (V):</label>
             <input type="number" id="voltage"><br><br>
             <label for="power">Power (W):</label>
             <input type="number" id="power"><br><br>
-
-            <h3>Or Upload a CSV File with Panel Data</h3>
-            <input type="file" id="csv-upload" accept=".csv"><br><br>
 
             <button id="calculate">Calculate Efficiency</button>
         </section>
@@ -62,14 +52,13 @@
         </section>
 
         <!-- Map Display -->
-        <div id="map" style="width: 100%; height: 400px;"></div>
+        <div id="map" style="width: 100%; height: 300px;"></div>
     </main>
 
     <footer>
         <p>&copy; 2025 Solar Panel Efficiency Calculator</p>
     </footer>
 
-    <!-- Link to external JS file (Flask will serve this from the /static folder) -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
