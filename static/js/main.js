@@ -91,8 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function updateChart(data) {
-        const labels = data.map(entry => `${entry.HR}:00`);
-        const values = data.map(entry => entry["Horas Solares"]);
+        const labels = data.map(entry => `${entry.Hora}:00`);
+        const values = data.map(entry => entry["Eficiencia Esperada"]);
 
         if (solarChart) {
             solarChart.destroy();
@@ -103,10 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: "Horas Solares",
+                    label: "Eficiencia Esperada",
                     data: values,
-                    borderColor: "#FFA500",
-                    backgroundColor: "rgba(255, 165, 0, 0.5)",
+                    borderColor: "#00BFFF",
+                    backgroundColor: "rgba(0, 191, 255, 0.5)",
                     fill: true,
                 }]
             },
@@ -116,13 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     x: {
                         title: {
                             display: true,
-                            text: "Hour of the Day"
+                            text: "Hora del Día"
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: "Solar Hours"
+                            text: "Eficiencia Esperada (%)"
                         }
                     }
                 }
