@@ -241,7 +241,7 @@ def compare_data():
         recommendation = "Possible faulty wire."
     else:
         #test 2, the [5]% difference count test
-        large_differences = sum(1 for exp, act in zip(expected_efficiency, actual_efficiency) if abs(exp - act) / exp > 0.025)
+        large_differences = sum(1 for exp, act in zip(expected_efficiency, actual_efficiency) if abs(exp - act) > 0.025)
         if large_differences > len(actual_efficiency) // 2:
             recommendation = "Possible dust or debris."
     
