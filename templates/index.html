@@ -6,6 +6,9 @@
     <title>Solar Panel Efficiency Monitor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
 </head>
 <body>
     <header>
@@ -32,6 +35,9 @@
         <div class="right-section">
             <section>
                 <h2>Upload CSV Data</h2>
+                <label for="csv-upload" class="upload-label">
+                    <i class="fas fa-upload"></i> <span id="file-name">Choose CSV File</span>
+                </label>
                 <input type="file" id="csv-upload" accept=".csv">
                 <button id="upload-csv">Upload CSV</button>
             </section>
@@ -47,6 +53,12 @@
             </section>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>Team1: Sol-Eye &copy; 2025</p>
+    </footer>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

@@ -13,8 +13,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let solarData = null;
     let csvData = null;
 
-    function checkCompareButton() {
-        compareButton.disabled = !(solarData && csvData);
+    
+    function disableButtons(){
+        fetchDataButton.disabled = true;
+        compareButton.disabled = true;
+    }
+
+
+    // Initially disable fetchDataButton and compareButton
+    disableButtons();
+
+    function checkButtons() {
+        // Enable fetchDataButton only if CSV is uploaded
+        fetchDataButton.disabled = !csvData;
+        // Enable compareButton only if both CSV and solar data are available
+        compareButton.disabled = !(csvData && solarData);
     }
 
     function fetchSuggestions(query) {
@@ -51,6 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     fetchDataButton.addEventListener("click", () => {
+        if (!csvData) {
+            alert("Please upload a CSV file first.");
+            return;
+        }
+
         const lat = latitudeInput.value;
         const lon = longitudeInput.value;
         if (!lat || !lon) {
@@ -66,10 +84,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
                 solarData = data.solar_data;
-                updateChart(solarData, csvData);
-                checkCompareButton();
+                updateChart();
+                checkButtons();
             });
     });
+
+    document.getElementById('csv-upload').addEventListener('change', function() {
+        const fileName = this.files[0] ? this.files[0].name : "Choose CSV File";
+        document.getElementById('file-name').textContent = fileName;
+    });
+    
 
     uploadButton.addEventListener("click", () => {
         const file = fileInput.files[0];
@@ -89,20 +113,31 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
                 csvData = data.csv_data;
-                updateChart(solarData, csvData);
-                checkCompareButton();
+                updateChart();
+                checkButtons();
+
+                // Reset recommendation section
+                document.getElementById("expected-power").textContent = "Expected Power: --";
+                document.getElementById("true-power").textContent = "Actual Power: --";
+                document.getElementById("efficiency").textContent = "Efficiency: --";
+                document.getElementById("recommendation").textContent = "Recommendation: --";
+
             })
             .catch(error => alert("Error uploading file: " + error));
     });
 
-    function updateChart(solarData, csvData) {
+
+
+
+    function updateChart() {
         let labelsSet = new Set();
         let solarValuesMap = new Map();
         let csvValuesMap = new Map();
 
         if (solarData) {
             solarData.forEach(entry => {
-                let timeLabel = `${entry.Hora}:00`;
+                // let timeLabel = `${entry.X}:00`;
+                let timeLabel = `${entry.X}`;
                 labelsSet.add(timeLabel);
                 solarValuesMap.set(timeLabel, entry["Eficiencia Esperada"]);
             });
@@ -110,13 +145,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (csvData) {
             csvData.forEach(entry => {
-                let timeLabel = `${entry.Hora}:00`;
+                // let timeLabel = `${entry.X}:00`;
+                let timeLabel = `${entry.X}`;
                 labelsSet.add(timeLabel);
                 csvValuesMap.set(timeLabel, entry["Eficiencia Real"]);
             });
         }
 
-        let labels = Array.from(labelsSet).sort();
+        let labels = Array.from(labelsSet).sort((a, b) => parseInt(a) - parseInt(b));
         let solarValues = labels.map(label => solarValuesMap.get(label) || null);
         let csvValues = labels.map(label => csvValuesMap.get(label) || null);
 
@@ -148,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
             options: {
                 responsive: true,
                 scales: {
-                    x: { title: { display: true, text: "Time of Day" } },
+                    x: { title: { display: true, text: "Month-Day-Hour" } },
                     y: { title: { display: true, text: "Efficiency (%)" } }
                 }
             }
@@ -156,8 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     compareButton.addEventListener("click", () => {
-        if (!solarData || !csvData) {
-            alert("Please load both solar data and CSV data before comparing.");
+        if (!csvData || !solarData) {
+            alert("Please upload CSV and fetch solar data before comparing.");
             return;
         }
 
@@ -173,6 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            disableButtons();
+            
             document.getElementById("expected-power").textContent = `Expected Power: ${data.expected_power}%`;
             document.getElementById("true-power").textContent = `Actual Power: ${data.true_power}%`;
             document.getElementById("efficiency").textContent = `Efficiency: ${data.efficiency}%`;
@@ -180,4 +218,5 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(error => alert("Error fetching comparison results: " + error));
     });
+
 });
