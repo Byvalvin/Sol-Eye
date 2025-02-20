@@ -4,44 +4,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const latitudeInput = document.getElementById("latitude");
     const longitudeInput = document.getElementById("longitude");
     const fetchDataButton = document.getElementById("fetch-data");
+    const fileInput = document.getElementById("csv-upload");
+    const uploadButton = document.getElementById("upload-csv");
+    const compareButton = document.getElementById("compare");
     const ctx = document.getElementById("solarChart").getContext("2d");
+
     let solarChart;
-    let debounceTimeout;
-    let lastSelectedAddress = "";
-    let addressCache = JSON.parse(localStorage.getItem("addressCache")) || {};
+    let solarData = null;
+    let csvData = null;
+
+    function checkCompareButton() {
+        compareButton.disabled = !(solarData && csvData);
+    }
 
     function fetchSuggestions(query) {
-        if (addressCache[query]) {
-            updateSuggestions(addressCache[query]);
-            return;
-        }
-
         fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1`)
             .then(response => response.json())
             .then(data => {
                 if (data.length === 0) return;
-                addressCache[query] = data.slice(0, 3);
-                localStorage.setItem("addressCache", JSON.stringify(addressCache));
-                updateSuggestions(addressCache[query]);
+                suggestionList.innerHTML = "";
+                data.slice(0, 3).forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = item.display_name;
+                    li.onclick = () => selectAddress(item);
+                    suggestionList.appendChild(li);
+                });
+                suggestionList.style.display = "block";
             });
     }
 
-    function updateSuggestions(data) {
-        suggestionList.innerHTML = "";
-        data.slice(0, 3).forEach(item => {
-            const li = document.createElement("li");
-            li.textContent = item.display_name;
-            li.onclick = () => {
-                selectAddress(item);
-            };
-            suggestionList.appendChild(li);
-        });
-        suggestionList.style.display = "block";
-    }
-
     function selectAddress(item) {
-        if (lastSelectedAddress === item.display_name) return;
-        lastSelectedAddress = item.display_name;
         addressInput.value = item.display_name;
         latitudeInput.value = item.lat;
         longitudeInput.value = item.lon;
@@ -49,24 +41,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     addressInput.addEventListener("input", () => {
-        clearTimeout(debounceTimeout);
-        const address = addressInput.value;
-        if (address.length >= 10) {
-            debounceTimeout = setTimeout(() => fetchSuggestions(address), 1000);
+        clearTimeout(this.debounceTimeout);
+        if (addressInput.value.length >= 10) {
+            this.debounceTimeout = setTimeout(() => fetchSuggestions(addressInput.value), 1000);
         } else {
             suggestionList.innerHTML = "";
-            suggestionList.style.display = "none";
-        }
-    });
-
-    addressInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && suggestionList.firstChild) {
-            selectAddress(addressCache[addressInput.value][0]);
-        }
-    });
-
-    document.addEventListener("click", (event) => {
-        if (!addressInput.contains(event.target) && !suggestionList.contains(event.target)) {
             suggestionList.style.display = "none";
         }
     });
@@ -75,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const lat = latitudeInput.value;
         const lon = longitudeInput.value;
         if (!lat || !lon) {
-            alert("Please enter valid latitude and longitude");
+            alert("Please enter a valid latitude and longitude.");
             return;
         }
 
@@ -83,16 +62,63 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert("Error fetching data: " + data.error);
+                    alert("Error fetching solar data: " + data.error);
                     return;
                 }
-                updateChart(data.solar_data);
+                solarData = data.solar_data;
+                updateChart(solarData, csvData);
+                checkCompareButton();
             });
     });
 
-    function updateChart(data) {
-        const labels = data.map(entry => `${entry.Hora}:00`);
-        const values = data.map(entry => entry["Eficiencia Esperada"]);
+    uploadButton.addEventListener("click", () => {
+        const file = fileInput.files[0];
+        if (!file) {
+            alert("Please select a CSV file.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        fetch("/upload_csv", { method: "POST", body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Error uploading CSV: " + data.error);
+                    return;
+                }
+                csvData = data.csv_data;
+                updateChart(solarData, csvData);
+                checkCompareButton();
+            })
+            .catch(error => alert("Error uploading file: " + error));
+    });
+
+    function updateChart(solarData, csvData) {
+        let labelsSet = new Set();
+        let solarValuesMap = new Map();
+        let csvValuesMap = new Map();
+
+        if (solarData) {
+            solarData.forEach(entry => {
+                let timeLabel = `${entry.Hora}:00`;
+                labelsSet.add(timeLabel);
+                solarValuesMap.set(timeLabel, entry["Eficiencia Esperada"]);
+            });
+        }
+
+        if (csvData) {
+            csvData.forEach(entry => {
+                let timeLabel = `${entry.Hora}:00`;
+                labelsSet.add(timeLabel);
+                csvValuesMap.set(timeLabel, entry["Eficiencia Real"]);
+            });
+        }
+
+        let labels = Array.from(labelsSet).sort();
+        let solarValues = labels.map(label => solarValuesMap.get(label) || null);
+        let csvValues = labels.map(label => csvValuesMap.get(label) || null);
 
         if (solarChart) {
             solarChart.destroy();
@@ -102,31 +128,57 @@ document.addEventListener("DOMContentLoaded", () => {
             type: "line",
             data: {
                 labels: labels,
-                datasets: [{
-                    label: "Eficiencia Esperada",
-                    data: values,
-                    borderColor: "#00BFFF",
-                    backgroundColor: "rgba(0, 191, 255, 0.5)",
-                    fill: true,
-                }]
+                datasets: [
+                    {
+                        label: "Expected Efficiency",
+                        data: solarValues,
+                        borderColor: "#00BFFF",
+                        backgroundColor: "rgba(0, 191, 255, 0.5)",
+                        fill: true,
+                    },
+                    {
+                        label: "Actual Efficiency",
+                        data: csvValues,
+                        borderColor: "#FF4500",
+                        backgroundColor: "rgba(255, 69, 0, 0.5)",
+                        fill: true,
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: "Hora del Día"
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: "Eficiencia Esperada (%)"
-                        }
-                    }
+                    x: { title: { display: true, text: "Time of Day" } },
+                    y: { title: { display: true, text: "Efficiency (%)" } }
                 }
             }
         });
     }
+
+    compareButton.addEventListener("click", () => {
+        if (!solarData || !csvData) {
+            alert("Please load both solar data and CSV data before comparing.");
+            return;
+        }
+
+        let expectedPower = solarData.reduce((sum, entry) => sum + (entry["Eficiencia Esperada"] || 0), 0) / solarData.length;
+        let actualPower = csvData.reduce((sum, entry) => sum + (entry["Eficiencia Real"] || 0), 0) / csvData.length;
+
+        let efficiency = ((actualPower / expectedPower) * 100).toFixed(2);
+
+        document.getElementById("expected-power").textContent = `Expected Power: ${expectedPower.toFixed(2)}%`;
+        document.getElementById("true-power").textContent = `Actual Power: ${actualPower.toFixed(2)}%`;
+        document.getElementById("efficiency").textContent = `Efficiency: ${efficiency}%`;
+
+        let recommendation;
+        if (efficiency >= 90) {
+            recommendation = "Panel is working optimally.";
+        } else if (efficiency >= 70) {
+            recommendation = "Possible dust or debris affecting efficiency.";
+        } else {
+            recommendation = "Possible faulty wire.";
+        }
+
+        document.getElementById("recommendation").textContent = `Recommendation: ${recommendation}`;
+    });
 });

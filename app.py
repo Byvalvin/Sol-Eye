@@ -10,10 +10,17 @@ CORS(app)
 
 NASA_API_URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
 START_DATE = "20180101"
+end_date = "20231231"
+
+Potencia_panel = 590
+TONC = 45
+CCTPmax = -0.29
+eficiencia_instalacion_fija = 0.7
+eficiencia_inversor = 0.98
+eficiencia_cables = 0.985
 
 def fetch_nasa_data(lat, lon):
     # end_date = datetime.now().strftime("%Y%m%d")
-    end_date = "20231231"
     params = {
         "start": START_DATE,
         "end": end_date,
@@ -84,17 +91,10 @@ def process_nasa_data(data, lat):
     factor_de_correcion = 1
     df["Horas Solares"] = df["Horas Solares Pico"] * factor_de_correcion
     
-    Potencia_panel = 590
-    TONC = 45
-    CCTPmax = -0.29
-    eficiencia_instalacion_fija = 0.7
-    eficiencia_inversor = 0.98
-    eficiencia_cables = 0.985
-    
     df["T_cel"] = df["Temperatura"] + df["Horas Solares"] * 1000 * (TONC - 20) / 800
     df["Eficiencia Esperada"] = ((1 - CCTPmax * 0.01 * (25 - df["T_cel"])) *
                                   eficiencia_instalacion_fija * eficiencia_inversor * eficiencia_cables)
-    df_filtrado = df[(df["Hora"] > 7) & (df["Hora"] < 17)]
+    df_filtrado = df[(df["Hora"] > 7) & (df["Hora"] < 18)]
     df_promedios = df_filtrado.groupby(["Mes", "Días Julianos", "Hora"])["Eficiencia Esperada"].mean().reset_index()
 
     # Crear tabla de referencia de días julianos
@@ -116,9 +116,7 @@ def process_nasa_data(data, lat):
 
 
     df2 = df_promedios
-
     df2[['Mes', 'Día']] = df_promedios['Días Julianos'].apply(lambda x: pd.Series(convertir_dia_juliano(x)))
-
     df2 = df_promedios.drop(columns=['Días Julianos'])
 
     columna = df2.pop('Día')
@@ -132,6 +130,52 @@ def get_solar_data():
     lon = float(request.args.get('lon'))
     solar_data = fetch_nasa_data(lat, lon)
     return jsonify({"solar_data": solar_data})
+
+
+
+Potencia_panel = 590
+
+def process_uploaded_csv(file):
+    possible_delimiters = ['\t', ',', ';', '|']
+    for delimiter in possible_delimiters:
+        try:
+            df = pd.read_csv(file, delimiter=delimiter, skiprows=1, header=None)  # Skip header
+            if df.shape[1] == 1:  # Ensure there is exactly 1 column
+                break
+        except Exception:
+            continue
+    else:
+        return {"error": "Could not parse CSV file with expected 1 column."}
+    
+    if df.shape[0] < 10:
+        return {"error": "CSV must have at least 10 rows of data."}
+    
+    df = df.tail(10)  # Keep only the last 10 values
+    df = df.reset_index(drop=True)
+    df.insert(0, "Hora", list(range(8, 18)))  # Assign hours 8 to 17
+    df[0] = df[0] / Potencia_panel  # Compute efficiency
+    df.rename(columns={0: "Eficiencia Real"}, inplace=True)
+    
+    return df.to_dict(orient="records")
+
+
+@app.route('/upload_csv', methods=['POST'])
+def upload_csv():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "Empty file name"}), 400
+    
+    try:
+        processed_data = process_uploaded_csv(file)
+        if "error" in processed_data:
+            return jsonify(processed_data), 400
+        return jsonify({"csv_data": processed_data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 
 @app.route('/')
 def index():
