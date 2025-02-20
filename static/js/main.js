@@ -161,24 +161,23 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        let expectedPower = solarData.reduce((sum, entry) => sum + (entry["Eficiencia Esperada"] || 0), 0) / solarData.length;
-        let actualPower = csvData.reduce((sum, entry) => sum + (entry["Eficiencia Real"] || 0), 0) / csvData.length;
+        fetch("/compare_data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ solar_data: solarData, csv_data: csvData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert("Error comparing data: " + data.error);
+                return;
+            }
 
-        let efficiency = ((actualPower / expectedPower) * 100).toFixed(2);
-
-        document.getElementById("expected-power").textContent = `Expected Power: ${expectedPower.toFixed(2)}%`;
-        document.getElementById("true-power").textContent = `Actual Power: ${actualPower.toFixed(2)}%`;
-        document.getElementById("efficiency").textContent = `Efficiency: ${efficiency}%`;
-
-        let recommendation;
-        if (efficiency >= 90) {
-            recommendation = "Panel is working optimally.";
-        } else if (efficiency >= 70) {
-            recommendation = "Possible dust or debris affecting efficiency.";
-        } else {
-            recommendation = "Possible faulty wire.";
-        }
-
-        document.getElementById("recommendation").textContent = `Recommendation: ${recommendation}`;
+            document.getElementById("expected-power").textContent = `Expected Power: ${data.expected_power}%`;
+            document.getElementById("true-power").textContent = `Actual Power: ${data.true_power}%`;
+            document.getElementById("efficiency").textContent = `Efficiency: ${data.efficiency}%`;
+            document.getElementById("recommendation").textContent = `Recommendation: ${data.recommendation}`;
+        })
+        .catch(error => alert("Error fetching comparison results: " + error));
     });
 });

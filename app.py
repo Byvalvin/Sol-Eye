@@ -4,6 +4,7 @@ import numpy as np
 import requests
 from datetime import datetime
 from flask_cors import CORS
+from scipy.stats import f
 
 app = Flask(__name__)
 CORS(app)
@@ -176,6 +177,40 @@ def upload_csv():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@app.route('/compare_data', methods=['POST'])
+def compare_data():
+    data = request.get_json()
+    solar_data = data.get("solar_data", [])
+    csv_data = data.get("csv_data", [])
+    
+    if not solar_data or not csv_data:
+        return jsonify({"error": "Both solar and CSV data are required"}), 400
+    
+    expected_efficiency = [entry["Eficiencia Esperada"] for entry in solar_data]
+    actual_efficiency = [entry["Eficiencia Real"] for entry in csv_data]
+    
+    var_expected = np.var(expected_efficiency, ddof=1)
+    var_actual = np.var(actual_efficiency, ddof=1)
+    
+    F_statistic = var_actual / var_expected if var_expected > 0 else float('inf')
+    p_value = 1 - f.cdf(F_statistic, len(actual_efficiency) - 1, len(expected_efficiency) - 1)
+    
+    avg_efficiency = np.mean(actual_efficiency) / np.mean(expected_efficiency) * 100
+    recommendation = "OK."
+    
+    if p_value < 0.05:
+        recommendation = "Possible faulty wire."
+    else:
+        large_differences = sum(1 for exp, act in zip(expected_efficiency, actual_efficiency) if abs(exp - act) / exp > 0.05)
+        if large_differences > len(actual_efficiency) // 2:
+            recommendation = "Possible dust or debris."
+    
+    return jsonify({
+        "expected_power": round(np.mean(expected_efficiency) * 100, 2),
+        "true_power": round(np.mean(actual_efficiency) * 100, 2),
+        "efficiency": round(avg_efficiency, 2),
+        "recommendation": recommendation
+    })
 
 @app.route('/')
 def index():
