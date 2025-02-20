@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 NASA_API_URL = "https://power.larc.nasa.gov/api/temporal/hourly/point"
-START_DATE = "20200101"
+START_DATE = "20210101"
 end_date = "20231231"
 
 Potencia_panel = 590
@@ -133,9 +133,21 @@ def process_nasa_data(data, lat):
     columna = df2.pop('Día')
     df2.insert(1, 'Día', columna)
 
+    global months, days, hours  # Ensure we modify the global lists
+    global input_rows
 
-    specific_rows = df2.index[(df2['Mes'].isin(months)) & (df2['Día'].isin(days)) & (df2['Hora'].isin(hours))].tolist()
-    df_filtered = df2.iloc[specific_rows][-input_rows:]  # Take only the last input_rows rows
+    data = {
+        "Month": months,
+        "Day": days,
+        "Hour": hours,
+    }
+    user_data = pd.DataFrame(data)
+    month = user_data["Month"].iloc[0]
+    day = user_data["Day"].iloc[0]
+    hour = user_data["Hour"].iloc[0]
+    specific_rows = df2.index[(df2['Mes'] == month) & (df2['Día'] == day) & (df2['Hora'] == hour)].tolist()
+    
+    df_filtered = df2.iloc[specific_rows[0] : specific_rows[0] + input_rows]
     if df_filtered.empty:
         print(input_rows, "epic fail error")
         return []
