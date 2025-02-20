@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Reset recommendation section
                 document.getElementById("expected-power").textContent = "Expected Efficiency: --";
                 document.getElementById("true-power").textContent = "Actual Efficiency: --";
-                document.getElementById("efficiency").textContent = "Efficiency: --";
+                document.getElementById("efficiency").textContent = "Variation in Efficiency: --";
                 document.getElementById("recommendation").textContent = "Recommendation: --";
 
             })
