@@ -146,7 +146,7 @@ def process_nasa_data(data, lat):
     day = user_data["Day"].iloc[0]
     hour = user_data["Hour"].iloc[0]
     specific_rows = df2.index[(df2['Mes'] == month) & (df2['Día'] == day) & (df2['Hora'] == hour)].tolist()
-    
+
     df_filtered = df2.iloc[specific_rows[0] : specific_rows[0] + input_rows]
     if df_filtered.empty:
         print(input_rows, "epic fail error")
@@ -241,7 +241,7 @@ def compare_data():
         recommendation = "Possible faulty wire."
     else:
         #test 2, the [5]% difference count test
-        large_differences = sum(1 for exp, act in zip(expected_efficiency, actual_efficiency) if abs(exp - act) / exp > 0.05)
+        large_differences = sum(1 for exp, act in zip(expected_efficiency, actual_efficiency) if abs(exp - act) / exp > 0.025)
         if large_differences > len(actual_efficiency) // 2:
             recommendation = "Possible dust or debris."
     

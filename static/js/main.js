@@ -117,8 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 checkButtons();
 
                 // Reset recommendation section
-                document.getElementById("expected-power").textContent = "Expected Power: --";
-                document.getElementById("true-power").textContent = "Actual Power: --";
+                document.getElementById("expected-power").textContent = "Expected Efficiency: --";
+                document.getElementById("true-power").textContent = "Actual Efficiency: --";
                 document.getElementById("efficiency").textContent = "Efficiency: --";
                 document.getElementById("recommendation").textContent = "Recommendation: --";
 
@@ -211,9 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             disableButtons();
             
-            document.getElementById("expected-power").textContent = `Expected Power: ${data.expected_power}%`;
-            document.getElementById("true-power").textContent = `Actual Power: ${data.true_power}%`;
-            document.getElementById("efficiency").textContent = `Efficiency: ${data.efficiency}%`;
+            document.getElementById("expected-power").textContent = `Expected Efficiency: ${data.expected_power}%`;
+            document.getElementById("true-power").textContent = `Actual Efficiency: ${data.true_power}%`;
+            document.getElementById("efficiency").textContent = `Variation in Efficiency: ${data.efficiency}%`;
             document.getElementById("recommendation").textContent = `Recommendation: ${data.recommendation}`;
         })
         .catch(error => alert("Error fetching comparison results: " + error));
