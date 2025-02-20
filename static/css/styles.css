@@ -157,8 +157,8 @@ button:disabled {
     margin: 0;
     position: absolute;
     background: #2A2F3B;
-    width: 100%;
-    max-width: 425px;
+    width: 90%;
+    max-width: 400px;
     border-radius: 5px;
     z-index: 1000;
     border: 1px solid #444;
