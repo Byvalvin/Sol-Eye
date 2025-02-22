@@ -1,4 +1,4 @@
-# SolarIQ
+![SolarIQ](https://github.com/user-attachments/assets/3885ebf2-bc4e-49bf-8ed3-f2fc026303ae)
 ## A Simple, Intuitive tracking and monitoring site for solar panel efficiency and maintenance.
 - Estimates Power Capturing efficiency of panels given panel data and location.
 - Highlights potential issues with panel/PV system
@@ -10,3 +10,4 @@
 3. Accepts location of solar panel/PV systen with address or latitude-longitude
 4. Outputs a comparison chart, efficiency estimate, potential issues and recommended actions for care and maintenance.
 5. For how to use: [help](https://github.com/Byvalvin/Sol-Eye/blob/main/doc/how-to-use.md)
+
