@@ -1,4 +1,7 @@
-![SolarIQ](https://github.com/user-attachments/assets/3885ebf2-bc4e-49bf-8ed3-f2fc026303ae)
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/3885ebf2-bc4e-49bf-8ed3-f2fc026303ae" alt="SolarIQ"/>
+</div>
+
 ## A Simple, Intuitive tracking and monitoring site for solar panel efficiency and maintenance.
 - Estimates Power Capturing efficiency of panels given panel data and location.
 - Highlights potential issues with panel/PV system
