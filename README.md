@@ -9,7 +9,7 @@
 
 # How it works:
 1. Uses historical data from [NASA's Data Access Viewer](https://power.larc.nasa.gov/data-access-viewer/) to determine the potential solar power available in a given location.
-2. Accepts csv input for the measured power generated a solar panel/PV system. [See csv format details](https://github.com/Byvalvin/Sol-Eye/blob/main/test/notes.txt).
+2. Accepts csv input for the measured power by generated a solar panel/PV system. [See csv format details](https://github.com/Byvalvin/Sol-Eye/blob/main/test/notes.txt).
 3. Accepts location of solar panel/PV systen with address or latitude-longitude
 4. Outputs a comparison chart, efficiency estimate, potential issues and recommended actions for care and maintenance.
 5. It is still experimental.
