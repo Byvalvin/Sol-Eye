@@ -9,4 +9,4 @@
 2. Accepts csv input for the measured power generated a solar panel/PV system. [See csv format details](https://github.com/Byvalvin/Sol-Eye/blob/main/test/notes.txt).
 3. Accepts location of solar panel/PV systen with address or latitude-longitude
 4. Outputs a comparison chart, efficiency estimate, potential issues and recommended actions for care and maintenance.
-5. For how to use: [help]()
+5. For how to use: [help](https://github.com/Byvalvin/Sol-Eye/blob/main/doc/how-to-use.md)
