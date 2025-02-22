@@ -15,5 +15,10 @@
 5. Currently experimental but shows promise.
 6. For how to use: [help](https://github.com/Byvalvin/Sol-Eye/blob/main/doc/how-to-use.md)
 
+# The Minds Behind SolarIQ
+- [Ayrton Castro](linkedin.com/in/97castroa)
+- [Jair Vasquez](vasquezt@ualberta.ca)
+- [Daniel Asimiakwini](byvalvin.github.io)
+
 # APIC
 This project was one of the entries in the [Alberta Power Industry Consortium(APIC) Hackathon 2025](https://www.apicweb.ca/hackathon-2025/)
