@@ -1,0 +1,15 @@
+The csv files can be used to test the website. They also show the format of input expected by the site.
+
+- .csv must have 4 columns: Month | Day | Hour(24 Hour Clock) | Measured Power(Watts)
+- The input for Month:
+  - Range: 1 - 12
+- Input for Day:
+  - Range: 
+        - 1 - 31 if Month is in {1,3,5,7,8,10,12}
+        - 1 - 30 if Month is in {4,6,9,11}
+        - 1 - 28 if Month is in {2}
+- Input for Hour:
+  - Range: 0 - 24
+
+- The location used for the given .csv files(i.e the location of the solar panel(s)) is 8515 112 ST NW
+
