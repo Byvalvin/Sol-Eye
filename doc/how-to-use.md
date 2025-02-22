@@ -1,3 +1,4 @@
+## Instructions
 1. Go to [SolarIQ](https://sol-eye.onrender.com/)
 2. Enter a suitable .csv file containing power data for the solar panel/PV system. [Instructions for .csv files]()
 3. Click the *Upload CSV* button to get the chart for the solar panel/PV system.
