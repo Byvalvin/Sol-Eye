@@ -15,3 +15,5 @@
 5. It is still experimental.
 6. For how to use: [help](https://github.com/Byvalvin/Sol-Eye/blob/main/doc/how-to-use.md)
 
+# APIC
+This project was one of the entries in the [Alberta Power Industry Consortium(APIC) Hackathon 2025](https://www.apicweb.ca/hackathon-2025/)
