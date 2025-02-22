@@ -1,4 +1,5 @@
-# SolarIQ: A Simple, Intuitive tracking and monitoring site for solar panel efficiency and maintenance.
+# SolarIQ
+## A Simple, Intuitive tracking and monitoring site for solar panel efficiency and maintenance.
 - Estimates Power Capturing efficiency of panels given panel data and location.
 - Highlights potential issues with panel/PV system
 - Suggest potential remedies/actionable steps for care and maintenance
