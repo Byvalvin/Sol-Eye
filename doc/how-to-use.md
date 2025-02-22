@@ -1,6 +1,6 @@
 ## Instructions
 1. Go to [SolarIQ](https://sol-eye.onrender.com/)
-2. Enter a suitable .csv file containing power data for the solar panel/PV system. [Instructions for .csv file formatting]()
+2. Enter a suitable .csv file containing power data for the solar panel/PV system. [Instructions for .csv file formatting](https://github.com/Byvalvin/Sol-Eye/blob/main/test/notes.txt)
 3. Click the *Upload CSV* button to get the chart for the solar panel/PV system.
 4. Enter the latitude and longitude(or the address to get the latitude and longitude) of the location of the solar panel/PV system.
 5. Click the *Get Solar Data* button to get the chart for the available solar power in the given location. This gives a visual comparison of the solar power available and the solar power captured by the solar panel/PV system.
