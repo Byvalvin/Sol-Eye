@@ -10,4 +10,5 @@
 - Getting Solar is the longest step in the process. It takes ~30 secs to complete(some patience is necessary here).
 - The process can be repeated for new csv files. If a new .csv file is added, the *Upload CSV* button should be clicked again to use the new .csv file.
 - Once the solar data for a location is gotten once, there is no need to retrieve it again unless the location is changed.
+- This is a showcase site, so initial loading of the site may take 1-2 mins.
 
