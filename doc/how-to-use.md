@@ -6,6 +6,7 @@
 5. Enter the latitude and longitude (or the address to get the latitude and longitude) of the location of the solar panel/PV system.
 6. Click the `Get Solar Data` button to get the chart for the available solar power in the given location. This gives a visual comparison of the solar power available and the solar power captured by the solar panel/PV system.
 7. Click the `Compare` button to get a recommendation based on the provided data.
+8. 
 
 ## Key points
 - Getting Solar Data is the longest step in the process. It takes ~30 secs to complete(some patience is necessary here).
